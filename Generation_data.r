@@ -31,7 +31,7 @@ get.data.MAR <- function(N = 300, prop.NA = 0.1, moc.mehanizma = 4, stevilo.skup
   
   #Manjkajoče vrednosti
   nMiss <- round(prop.NA *N)
-  verjetnosti.na <- (scale(podatki[,1]))^moc.mehanizma/(sum(podatki[,1]))^moc.mehanizma
+  verjetnosti.na <- abs((podatki[,1])^moc.mehanizma/(sum(podatki[,1]))^moc.mehanizma)
   
   set.na.2 <- sample(length(verjetnosti.na), size = nMiss, prob = verjetnosti.na)
   podatki[set.na.2, 2] <- NA #X1 vpliva na X2
