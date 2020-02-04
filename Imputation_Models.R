@@ -1,0 +1,162 @@
+library("DMwR")
+library("MASS")
+library("norm")
+library("missForest")
+library("mice")
+library("fpc")
+library("DescTools")
+
+#######MICE 1#############
+lda_mice <- function(miss_df, test_df, m){
+  df <- miss_df
+  df_test <- test_df
+  n.test.data <- nrow(test_df)
+  #Imputiram manjkajoče vrednosti z mice
+  imp <- mice(df, m = m, printFlag = FALSE) 
+  
+  #shranimo vsa imp. podatkovja v long format
+  imp_tot <- complete(imp, "long", include = FALSE)
+  
+  #pogledamo subset posebaj in primerjamo posteriorno verjetnost podatkov s testni podatkovjem
+  post_tot <- NULL
+  for(i in 1:m){
+    mod <- lda(skupina ~ X1 + X2 + X3 + X4, imp_tot[(i-1)*300+1:((i-1)*300+300),])
+    post <- predict(mod, df_test[,1:4])$posterior 
+    post_tot <- rbind(post_tot, post)  
+  }
+  post_tot <- as.data.frame(post_tot)
+  
+  #dodam spremenljivko podatkovje
+  post_tot[,4] <- as.factor(rep(1:m, each = n.test.data))
+  #dodam spremenljivko enota
+  post_tot[,5] <- as.factor(rep(1:n.test.data, times = m))
+  #povprečim verjetnosti po vseh podatkovjih
+  imp_agg_post <- aggregate(post_tot[,1:3], list(post_tot$V5), mean)
+  imp_agg_post <- imp_agg_post[,-1]
+  #določim skupino glede na največjo verjetnost
+  imp_class <- NULL
+  for(i in 1:nrow(imp_agg_post)){
+    class <- if(imp_agg_post[i,1] == max(imp_agg_post[i,])){
+      1
+    }else if(imp_agg_post[i,2] == max(imp_agg_post[i,])){
+      2
+    } else{3}
+    imp_class <- c(imp_class,class)
+  }
+  
+  #delez pravilno razvrscenih
+  lda_prop <- mean(imp_class==df_test[,5])
+  
+  k <- list(m = m, class = imp_class, prop = lda_prop, con_X2 = aggregate(post_tot[,1:3], list(post_tot$V4), mean)[,2],
+            con_X3 = aggregate(post_tot[,1:3], list(post_tot$V4), mean)[,3],
+            con_X4 = aggregate(post_tot[,1:3], list(post_tot$V4), mean)[,4])
+  return(k)
+}
+
+
+######MICE 2###############
+lda_mice_2 <- function(data.train, data.test){
+  n.skupine <- nrow(data.train)/3
+  rez.pos <- NULL
+  miceImp <-  mice(data.train[,1:4], m=10, maxit=15)
+  for(i in 1:10){
+    popolni.i <- complete(miceImp, i)
+    popolni.i$skupina <- rep(c(1,2,3), times = rep(n.skupine,3))
+    rez.i <- make.lda(popolni.i, data.test)
+    rez.pos[i] <- rez.i
+  }
+  return(mean(rez.pos))
+}
+
+
+#######KNNimputation#########
+
+lda_knn <- function(miss_df, test_df, k){
+  
+  #funkcija rabi stolpec, ki pove vrstico (faktor)  
+  miss_df[,6] <- factor(seq(1,nrow(miss_df)))
+  knn_imp <- knnImputation(miss_df, k)
+  
+  #LDA model z imputiranimi vrednostmi
+  knn_mod <- lda(skupina ~ X1 + X2 + X3 + X4, knn_imp)
+  knn_class <- predict(knn_mod, test_df[,1:4])$class
+  
+  #delez pravilno razvrscenih
+  prop <-  mean(knn_class==test_df[,5])
+}
+
+
+#######EM-algoritem############
+
+lda_EM.algoritem <- function(data.train, data.test){
+  imputiran.dataset <- NULL
+  for(i in 1:3){
+    n.prva <- first(which(data.test$skupina == i))
+    n.zadnja <- last(which(data.test$skupina == i))
+    velikost.skupine <- (n.zadnja - n.prva) + 1
+    i.skupina <- data.train[n.prva:n.zadnja,]
+    
+    #EM-algoritem
+    dataPrep <- prelim.norm(as.matrix(i.skupina[,1:4]))
+    thetahat <- em.norm(dataPrep, showits = F)
+    resEM <- getparam.norm(dataPrep, thetahat, corr=TRUE)
+    EM.data.incomplite <- as.data.frame(mvrnorm(n = velikost.skupine, mu = resEM$mu, Sigma = resEM$r))
+    colnames(EM.data.incomplite) <- c("X1", "X2", "X3", "X4")
+    EM.data.incomplite$skupina <- rep(i, velikost.skupine)
+    popravljen.dataSet <- i.skupina
+    popravljen.dataSet[which(is.na(i.skupina[,1])),1] <- EM.data.incomplite[which(is.na(i.skupina[,1])),1]
+    popravljen.dataSet[which(is.na(i.skupina[,2])),2] <- EM.data.incomplite[which(is.na(i.skupina[,2])),2]
+    popravljen.dataSet[which(is.na(i.skupina[,3])),3] <- EM.data.incomplite[which(is.na(i.skupina[,3])),3]
+    popravljen.dataSet[which(is.na(i.skupina[,4])),4] <- EM.data.incomplite[which(is.na(i.skupina[,4])),4]
+    #zdaj imamo imputiran dataset za i.to skupino
+    imputiran.dataset <- rbind(imputiran.dataset, popravljen.dataSet) #shranimo
+  }
+  #LDA model z imputiranimi vrednostmi
+  em_mod <- lda(skupina ~ X1 + X2 + X3 + X4, imputiran.dataset)
+  em_class <- predict(em_mod, data.test[,1:4])$class
+  
+  #delez pravilno razvrscenih
+  prop <-  mean(em_class==data.test[,5])
+  
+  return(prop)
+}
+
+##########RANDOM FOREST########
+lda_rf <- function(miss_df, test_df, maxiter = 10, OOB = TRUE){
+  
+  #Imputiram manjkajoče vrednosti z rf
+  imp <- missForest(miss_df, maxiter = maxiter, 
+                    variablewise = OOB)
+  
+  #LDA model
+  rf_mod <- lda(skupina ~ X1 + X2 + X3 + X4, imp$ximp)
+  rf_class <- predict(rf_mod, test_df[,1:4])$class
+  
+  #Delez pravilno razvrščenih enot
+  k <- list(prop = mean(rf_class==test_df[,5]), OOB = imp$OOBerror)
+  return(k)
+}
+
+
+########COMPLETE CASES##########
+lda_complete.cases <- function(miss_df, test_df){
+  miss_df.complete <- miss_df[complete.cases(miss_df),]
+  cc_model <- lda(skupina ~ X1 + X2 + X3 + X4, miss_df.complete)
+  cc_class <- predict(cc_model, test_df[,1:4])$class
+  
+  #delez pravilno razvrscenih
+  prop <-  mean(cc_class==test_df[,5])
+  return(prop)
+}
+
+########PERFECT CASES############
+
+lda_perfect.cases <- function(perfect_df, test_df){
+  pc_model <- lda(skupina ~ X1 + X2 + X3 + X4, perfect_df)
+  pc_class <- predict(pc_model, test_df[,1:4])$class
+  
+  #delez pravilno razvrscenih
+  prop <-  mean(pc_class==test_df[,5])
+  return(prop)
+}
+
