@@ -1,0 +1,146 @@
+---
+title: "RZM_simulacija_missing"
+author: "Nace Vrecek"
+date: "2020 M02 5"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+setwd("D:/Faks/Uporabna statistika/Racunsko zahtevne metode/RZM_Seminarska")
+#MCAR
+
+# # poglej stevilo jedr in odstej enega (za nase delo)
+no_cores <- detectCores() - 1
+# 
+# # doloci "skupine" za delo
+cl <- makeCluster(no_cores)
+# 
+# # registriraj "parallel beckend"
+registerDoParallel(cl)
+
+
+pon <- 300
+sampleSize <- 300
+stSpremenljivk <- 4
+delez_na <- c(0.3, 0.4, 0.5, 0.6)
+zasnova <- expand.grid(delez_na, sampleSize, stSpremenljivk)
+zasnova <- do.call(rbind, replicate(pon, zasnova, simplify=FALSE)) %>% `colnames<-`(c("delez_na", "N", "n_skupin"))
+
+# file.remove("simulacija.log")
+# log_con <- file("simulacija.log")
+# cat("Iteration", i, "finished", file = "simulacija.log", sep = " ", fill = TRUE, append = TRUE)
+
+
+system.time(
+rez <- foreach(i = 1:nrow(zasnova), .combine = "rbind", 
+                 .packages = c("MASS", "mice", "missForest", "fpc", "DescTools", 
+                               "DMwR", "missForest", "ImputacijeRZM", "pastecs", "norm")) %dorng% {
+
+
+                                                                  
+  df <- get.data.MCAR(300, zasnova[i, "delez_na"])
+  df.test <- get.data.MCAR(1200,0)[[1]]
+  data.NA <- df[[1]]
+  data.perfect <- df[[2]]
+  
+  comp <- lda_perfect.cases(data.perfect, df.test)
+  pair <- lda_pair(data.NA, df.test)
+  rf <- lda_rf(data.NA, df.test)
+  em <- EM.algoritem(data.NA, df.test)
+  knn <- lda_knn(data.NA, df.test, k =10)
+  mice <- lda_mice(data.NA, df.test, 10)
+  
+  cbind(zasnova[i,],"comp" = comp,"pair" = pair,"rf" = rf$prop, "em" = em, "knn" = knn, "mice" = mice$prop)
+
+})
+
+stopCluster(cl)
+registerDoSEQ()
+
+save(rez, file = "rez_MCAR_RData")
+
+melted <- melt(rez, 
+            id.vars = c("delez_na", "N", "n_skupin"),
+            measure.vars = c("comp","pair","rf", "em", "knn", "mice"))
+
+  ggplot(data = melted, mapping = aes(x = delez_na, y = value, group = variable, col = variable)) +
+  scale_x_continuous(name = "Delez manjkajocih vrednosti") +
+  scale_y_continuous(name = "Delez pravilno razvrscenih enot") +
+  stat_summary(fun.y = mean, geom = "point") + 
+  stat_summary(fun.y = mean, geom = "line")
+
+
+ggsave("plot_MCAR.png")
+
+
+
+
+#MAR
+
+# # poglej stevilo jedr in odstej enega (za nase delo)
+no_cores <- detectCores() - 1
+# 
+# # doloci "skupine" za delo
+cl <- makeCluster(no_cores)
+# 
+# # registriraj "parallel beckend"
+registerDoParallel(cl)
+
+pon <- 300
+sampleSize <- 300
+stSpremenljivk <- 3
+delez_na <- c(0.3, 0.4, 0.5, 0.6)
+moc <- c(1,2,5,8,15)
+zasnova <- expand.grid(delez_na,moc, sampleSize, stSpremenljivk)
+zasnova <- do.call(rbind, replicate(pon, zasnova, simplify=FALSE)) %>% `colnames<-`(c("delez_na","moc", "N", "n_skupin"))
+
+# file.remove("simulacija.log")
+# log_con <- file("simulacija.log")
+# cat("Iteration", i, "finished", file = "simulacija.log", sep = " ", fill = TRUE, append = TRUE)
+
+
+system.time(
+  rez <- foreach(i = 1:nrow(zasnova), .combine = "rbind", 
+                 .packages = c("MASS", "mice", "missForest", "fpc", "DescTools", 
+                               "DMwR", "missForest", "ImputacijeRZM", "pastecs", "norm")) %dorng% {
+                                 
+                                 
+                                 
+  df <- get.data.MAR(300, zasnova[i, "delez_na"], zasnova[i, "moc"])
+  df.test <- get.data.MAR(1200, 0,0)[[1]]
+  data.NA <- df[[1]]
+  data.perfect <- df[[2]]
+  
+  comp <- lda_perfect.cases(data.perfect, df.test)
+  pair <- lda_pair(data.NA, df.test)
+  rf <- lda_rf(data.NA, df.test)
+  em <- EM.algoritem(data.NA, df.test)
+  knn <- lda_knn(data.NA, df.test, 10)
+  mice <- lda_mice(data.NA, df.test, 10)
+  
+  cbind(zasnova[i,], "comp" = comp, "pair" = pair, "rf" = rf$prop, "em" = em, "knn" = knn, "mice" = mice$prop)
+})
+
+stopCluster(cl)
+registerDoSEQ()
+
+save(rez, file = "rez_MAR_RData")
+
+melted <- melt(rez, 
+               id.vars = c("delez_na", "N", "n_skupin"),
+               measure.vars = c("comp","pair","rf", "em", "knn", "mice"))
+
+ggplot(data = melted, mapping = aes(x = delez_na, y = value, group = variable, col = variable)) +
+  scale_x_continuous(name = "Delez manjkajocih vrednosti") +
+  scale_y_continuous(name = "Delez pravilno razvrscenih enot") +
+  stat_summary(fun.y = mean, geom = "point") + 
+  stat_summary(fun.y = mean, geom = "line")
+
+ggsave("plot_MAR.png")
+
+```
+
