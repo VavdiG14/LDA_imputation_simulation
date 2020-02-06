@@ -7,8 +7,8 @@ source("Imputation_Models.R")
 
 pon <- 5
 sampleSize <- 300
-delez_na <- c(0.3, 0.4, 0.5, 0.6)
-moc <- c(1, 2, 5, 8, 12)
+delez_na <- c(0.3, 0.4, 0.5, 0.6, 0.7)
+moc <- c(1, 2, 5, 8, 15)
 zasnova <- expand.grid(delez_na,  moc, sampleSize)
 zasnova <- do.call(rbind, replicate(pon, zasnova, simplify=FALSE)) %>% `colnames<-`(c("delez_na", "moc_mehanizma", "N"))
 
