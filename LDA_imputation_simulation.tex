@@ -31,11 +31,10 @@ Manjkajoče vrednosti}}
 	\tableofcontents
 
 
-
+\newpage
 \section{Cilj naloge}
 Primerjanje uspešnosti razvrščanja v skupine z linearno diskriminantno analizo ob uporabi različnih metod za imputacijo manjkajočih vrednostih ter različnih mehanizmih manjkajočih vrednosti.
 
-\pagebreak
 
 \section{Mehanizmi manjkajočih vrednosti in generiranje podatkov}
 
@@ -57,7 +56,8 @@ Primerjanje uspešnosti razvrščanja v skupine z linearno diskriminantno analiz
 
 $$p = \big| \frac{(X_1)^m}{(\sum_{i=1}^{n}X_1)^m} \big| $$
 
-\noindent Izbirala sva med 5 različnimi vrednostmi $m: \{1, 2, 5, 8, 12  \}$. Spodaj so narisani grafi za lažjo predstavo. Narisane so na vzorci N = 300 in 50\% manjkajočih vrednosti, za moč: $m = 1$  in $m= 12$, pri spremenljivki $X_3$:
+
+\noindent Izbirala sva med 5 različnimi vrednostmi $m: \{1, 2, 5, 8, 12  \}$. Spodaj so narisani grafi za lažjo predstavo. Narisani so na vzorcu N = 300 in 50\% manjkajočih vrednosti, za moč: $m = 1$  in $m= 12$, pri spremenljivki $X_3$:
 
 \begin{figure}[ht]
 	\centering
@@ -117,10 +117,9 @@ $$p = \big| \frac{(X_1)^m}{(\sum_{i=1}^{n}X_1)^m} \big| $$
 $$p_i = \big| \frac{(X_i)^m}{(\sum_{i=1}^{n}X_i)^m} \big| $$
 
 \noindent za $i = 1,2,3$.
-
+\newpage
 \noindent Izbirala sva med 5 različnimi vrednostmi $m: \{1, 2, 5, 8, 12  \}$. Spodaj so narisani grafi za lažjo predstavo. Narisane so na vzorci N = 300 in 50\% manjkajočih vrednosti, za moč: $m = 1$  in $m= 12$, pri spremenljivkah $X_3$:
 
-\pagebreak
 
 \begin{figure}[ht]
 	\centering
@@ -180,7 +179,8 @@ Analiza na podlagi popolnih enot (listwise deletion) je smiselna kadar velja MCA
 
 
 \subsection{Multiple imputacije preko verižnih enačb (MICE)}
-Metoda MICE prihaja iz družine multiplih imputacij. Torej generiramo več ločenih podatkovij z imputiranimi vrednostmi (metodo imputiranja manjkajočih vrednosti določimo sami). Funkcija \emph{mice} iz istoimenskega paketa kot metodo imputiranja uporablja \emph{predictive mean matching}. Za vsako manjkajočo vrednost prediktorja izberemo majhen set kandidatov (cca. 10), ki nimajo manjkajočih vrednosti ter imajo napovedane vrednosti najbližje napovedani vrednosti manjkajočega prediktorja. Izmed tega seta kandidatov naključno izberemo eno vrednost ter s to vrednostjo nadomestimo manjkajočo vrednost prediktorja. Glavna predpostavka MICE metode je, da mora biti porazdelitev manjkajočih vrednosti enaka porazdelitvi opazovanih vrednosti ter, da je mehanizem manjkajočih vrednosti MCAR. 
+Metoda MICE prihaja iz družine multiplih imputacij. Torej generiramo več ločenih podatkovij z imputiranimi vrednostmi (metodo imputiranja manjkajočih vrednosti določimo sami). Funkcija \emph{mice} iz istoimenskega paketa kot metodo imputiranja uporablja \emph{predictive mean matching}. Za vsako manjkajočo vrednost prediktorja izberemo majhen set kandidatov (cca. 10), ki nimajo manjkajočih vrednosti ter imajo napovedane vrednosti najbližje napovedani vrednosti manjkajočega prediktorja. Izmed tega seta kandidatov naključno izberemo eno vrednost ter s to vrednostjo nadomestimo manjkajočo vrednost prediktorja. Glavna predpostavka MICE metode je, da mora biti porazdelitev manjkajočih vrednosti enaka porazdelitvi opazovanih vrednosti ter, da je mehanizem manjkajočih vrednosti MCAR.\\
+Kot optimalno število imputiranih podatkovij literatura navaja vrednosti od 5-10 (White et al., 2010). Za potrebe najine seminarske naloge sva izbrala 10 imputiranih podatkovij ter 5 iteracij za vsako podatkovje.
 
 \subsubsection{Koraki:}
 \begin{enumerate}
@@ -221,13 +221,14 @@ Metoda imputacij preko slučajnih gozdov je primerna tako za kvalitativne kot za
 
 \subsection{Metoda imputacij na podlagi najbližjih sosedov (kNN)}
 Metoda imputacij na podlagi najbližjih sosedov je metoda, ki temelji na podobnosti (oz. razdalji) med podatki (Beretta \& Santaniello, 2016). Algoritem za ocenjevanje manjkajočih vrednosti uporabi samo popolne enote. Za oceno manjkajoče vrednosti na spremenljivki $x1$, pogledamo $k$ vrednosti enot spremenljivke $x1$, katerih vrednosti so najbolj podobne vrednosti enote, ki ima manjkajočo vrednost. Glede optimalne določitve $k$ ni jasnega konsenza. Tako sta Lall in Sharma (1996), kot primerno metodo ocenjevanja optimalnega števila najbližjih sosedov podala enačbo $k = \sqrt{n}$, če je $n > 100$. Kot metodo imputiranja manjkajočih vrednosti sva izbrala metodo obteženih povprečij. Uteži se izračunajo kot $e^{-d(k,x)}$, kjer $d$ predstavlja Evklidsko razdaljo med enoto z manjkajočo vrednostjo ($x$) ter $k-tim$ sosedom.\\
-Predpostavka kNN metode je, da lahko napovemo manjkajočo vrednost, na podlagi podobnih vrednosti drugih spremenljivk, ki nimajo manjkajočih vrednosti, torej, da obstaja povezanost med spremenljivko z manjkajočo enoto ter ostalimi spremeljivkami.
+Predpostavka kNN metode je, da lahko napovemo manjkajočo vrednost, na podlagi podobnih vrednosti drugih spremenljivk, ki nimajo manjkajočih vrednosti, torej, da obstaja povezanost med spremenljivko z manjkajočo enoto ter ostalimi spremeljivkami.\\
+Za potrebe seminarske naloge sva nastavila $k$ (število najbližjih sosedov) na 10.\\
 
 \subsection{EM algoritem}
 
 EM-algortem temelji na dveh predpostavkah. Opazovane vrednosti so neodvisne v p razsežnem normalnem prostoru s parametri $\mu$ in $\Sigma$. Algoritem ocenjuje po metodi največjega verjetja. Druga predpostavka pravi, da podatki manjkajo naključno (MCAR) in neodvisno, vendar tako, da nikoli ne manjkajo vse komponente.
 
-V praksi sva uporabila programsko knjižnico \verb|norm| in njene funkcije \verb|em.norm|, ki naredi EM - algoritem na nepopolnih podatkih za vsako skupino posebaj. Potem sva z funkcijo \verb|getparam.nor|, kjer sva dobila parametre porazdelitve za vsako skupino posebaj. Te parametre sva uporabila za generiranje novih podatkov, za vsako skupino posebaj. Potem sva združila nepopolni set in zamenjala NA vrednosti z novimi generiranimi podatki, za vsako skupino posebaj. Nato sva združila v eno podatkovje in izvedla LDA.
+V praksi sva uporabila programsko knjižnico \verb|norm| in njene funkcije \verb|em.norm|, ki naredi EM - algoritem na nepopolnih podatkih za vsako skupino posebaj. Potem sva z funkcijo \verb|getparam.nor|, kjer sva dobila parametre porazdelitve za vsako skupino posebaj. Te parametre sva uporabila za generiranje novih podatkov, za vsako skupino posebaj. Potem sva združila nepopolni set in zamenjala NA vrednosti z novimi generiranimi podatki, za vsako skupino posebej. Nato sva združila v eno podatkovje in izvedla LDA.
 
 \pagebreak
 
@@ -266,9 +267,11 @@ Originalno (popolno) podatkovje sva generirala iz multivariatne normalne porazde
 \begin{figure}[ht]
 	\centering
 	\includegraphics[width= 12cm, height = 7cm]{img/MCAR_boxplot.png}
-	\caption{Porazdelitev...} 
+	\caption{Variabilnost deleža pravilno razvrščenih enot pri mehanizmu MCAR} 
 	\label{fig:3}
 \end{figure}
+
+\noindent Na sliki 3 lahko vidimo, da variabilnost ocen z naraščanjem deleža manjkajočih vrednosti postopoma narašča, predvsem pa je očiten porast pri metodi popolnih enot, ko variabilnost narašča hitreje kot pri ostalih metodah.
 
 %Variabilnost je povsod približno enaka (0.01), razen pri complete cases, kjer pri velikem deležu NA vrednosti, naraste do 0.04. Govoriva od SD.
 
@@ -281,6 +284,8 @@ Originalno (popolno) podatkovje sva generirala iz multivariatne normalne porazde
 	\label{fig:4}
 \end{figure}
 
+\noindent Kot prikazuje slika 4, uspešnost razvrstitve pada z naraščanjem deleža manjkajočih vrednosti, vendar se hitrost padanja razlikuje med metodami. Najslabše razvrstitve je vrnila metoda z EM algoritmom, kNN metoda in metoda popolnih enot sta si precej podobni, razen v začetni razvrstitvi, ko je delež manjkajočih enot enak 0.3. Najboljše rezultate je vrnila metoda MICE, za katero lahko vidimo, da ima rezulate precej podobne razvrstitvi na celotnem podatkovju, prav tako pa uspešnost z višanjem deleža manjkajočih vrednosti ne pada tako hitro kot pri ostalih metodah.
+
 \pagebreak
 
 \subsection{Rezultati MAR}
@@ -288,30 +293,37 @@ Originalno (popolno) podatkovje sva generirala iz multivariatne normalne porazde
 \begin{figure}[ht]
 	\centering
 	\includegraphics[width= 12cm, height = 7cm]{img/MAR_boxplot.png}
-	\caption{Porazdelitev...} 
+	\caption{Variabilnost deleža pravilno razvrščenih enot pri mehanizmu MAR} 
 	\label{fig:5}
 \end{figure}
+
+\noindent Variabilnost na sliki 5 je podana samo glede na delež manjkajočih vrrednosti, ne pa tudi upoštevajoč moč mehanizma, kajti variabilnost metod se ni bistveno razlikovala med različnimi močmi mehanizma MAR. Pri nizkem deležu manjkajočih enot vidimo, da je variabilnost uspešnosti razvrstitve met metodami primerljiva. Z naraščanjem deleža manjkajočih enot se variabilnost povečuje pri vseh metodah, največja razlika v variabilnosti pa je pri metodah na popolnih enotah ter kNN metodi. Najmanjša razlika v variabilnosti uspešnosti razvrstitve, glede na delež manjkajočih vrednosti je pri metodi MICE, sledi pa ji EM algoritem.
+ 
 
 %Variabilnosti nisem dal kot tabelo, ker je preveč različnih. Lahko rečeš, da je največja variabilnost (sd) pri complete.data (od 0.02 do 0.12) in knnImputation (od 0.01 do 0.10). Vsi ostali imajo variabilnost bistveno manjšo (od 0.05 do 0.02) ne upoštevajoč dejavnik moči mehanizma
 
 \begin{figure}[ht]
 	\centering
 	\includegraphics[width= 12cm, height = 7cm]{img/MAR_line_mean.png}
-	\caption{Povprečje uspešnosti pri mehanizmu MAR za različne deleže manjkajočih vrednosti in moči} 
+	\caption{Povprečje uspešnosti pri mehanizmu MAR za različne deleže manjkajočih vrednosti in moči mehanizma} 
 	\label{fig:6}
 \end{figure}
 
-\pagebreak
+\noindent Slika 6 prikazuje povprečno uspešnost razvrstitve enot glede na delež manjkajočih vrednosti ter moč mehanizma MAR. Opazimo, da je uspešnost razvrstitve pri metodi MICE pri nizki moči (1 in 2) primerljiva z razvrstitvijo na originalnem podatkovju (brez manjkajočih vrednosti), z večanjem moči pa metoda MICE dosega vedno slabše rezultate. Pri nizki moči sta metodi kNN in metoda slučajnih gozdov primerljivi, z večanjem moči ter deležem manjkajočih vrednosti pa uspešnost razvrstitve pada hitreje pri metodi kNN kot pri metodi slučajnih gozdov. Izmed imputacijskih metod je, pri nizki moči ter nizkih deležih manjkajočih vrednosti, EM algoritem dosegel najslabše rezulate, z višanjem moči mehanizma manjkajočih vrednosti ter deležem manjkajočih vrednosti pa slabše rezultate vrneta metodi kNN in metoda slučajnih gozdov. Pričakovano uspešnost razvrstitve z metodo narejeno na  popolnih podatkih, pada najhitreje. 
+
 
 \subsection{Rezultati NMAR}
 
 \begin{figure}[ht]
 	\centering
 	\includegraphics[width= 12cm, height = 7cm]{img/NMAR_boxplot.png}
-	\caption{...} 
+	\caption{Variabilnost deleža pravilno razvrščenih enot pri mehanizmu NMAR} 
 	\label{fig:7}
 \end{figure}
 
+\noindent Variabilnost na sliki 7 je podana samo glede na delež manjkajočih vrrednosti, ne pa tudi upoštevajoč moč mehanizma, kajti variabilnost metod se ni bistveno razlikovala med različnimi močmi mehanizma NMAR. Pri nizkem deležu manjkajočih enot je variabilnost uspešnosti razvrščanja med metodami primerljiva, odstopata metodi EM algoritem in metoda popolnih enot. Z večanjem deleža manjkajočih vrednosti se variabilnost povečuje pri vseh metodah, najbolj pa je to očitno pri metodi kNN ter metodi popolnih enot.
+
+\pagebreak
 
 \begin{figure}[ht]
 	\centering
@@ -320,10 +332,14 @@ Originalno (popolno) podatkovje sva generirala iz multivariatne normalne porazde
 	\label{fig:8}
 \end{figure}
 
+\noindent Slika 8 prikazuje povprečno uspešnost razvrstitve enot glede na delež manjkajočih vrednosti ter moč mehanizma NMAR. Pri moči mehanizma 1 je uspešnost razvrstitve pri metodi MICE podobna razvrstitvi na originalnem podatkovju (brez manjkajočih vrednosti). Z večanjem moči mehanizma manjkajočih vrednosti se uspešnost razvrstitve slabša pri vseh metodah, poleg metode popolnih enot pa najslabše rezultate dosega metoda kNN. Izmed vseh uporabljenih metod je metoda MICE dosegla najboljše rezultate.  
+
+
 \pagebreak
 \section{Zaključek}
 
-Ne pozabi na priporočila.
+Cilj seminarske naloge je bil preverjanje uspešnosti različnih metod imputacije, preko razvrščanja v skupine z linearno diskriminantno analizo. Večina imputacijskih metod predpostavlja MCAR oziroma MAR mehanizem manjkajočih vrednosti, zato sva poelg tega vključila tudi NMAR mehanizem ter preverjala vpliv moči mehanizma (verjetnosti za manjkajočo vrednost) ter delež manjkajočih vrednosti. Pri vseh mehanizmih manjkajočih vrednosti je najboljše razvrstitve vrnil LDA model, narejen na imputiranem podatkovju z metodo MICE. Pri MAR mehanizmu so bile razvrstitve pri metodi MICE malo nižje kot razvrstitev narejena na originalnem podatkovju (brez manjkajočih vrednosti). Pri MAR in NMAR mehanizmu je uspešnost razvrstitve padala z večanjem moči mehanizma, vendar je bila še vedno višja kot pri ostalih metodah. Variabilnost uspešnosti razvrstitve je bila v primeri MCAR in MAR najnižja pri metodi MICE, pri NMAR pa je bila najnižja variabilnost pri EM algoritmu.\\
+Izmed izbranih imputacijskih metod priporočava metodo MICE, vendar pa je pri interpretaciji rezultatov potrebna previdnost, saj v večini primerov ne poznamo mehanizma manjkajočih vrednosti. Prav tako sva v najini seminarski nalogi preverjala imuptacijske metode zgolj za številske spremenljivke.
 
     
  
@@ -334,6 +350,10 @@ Ne pozabi na priporočila.
 Beretta, L., Santaniello, A. (2016).
 \textit{Nearest neighbor imputation algorithms: a critical evaluation.}
 BMC Med Inform Decis Mak. 2016;16(Suppl 3):74. doi: 10.1186/s12911-016-0318-z.
+\bibitem{EM}
+Geoffrey J. M., \& Thriyambakam K. (1997) 
+\textit{The EM Algorithm and Extensions.} 
+Wiley Series in Probability and Statistics
 \bibitem{Listwise} 
 Graham, J. W. (2009). 
 \textit{Missing data analysis: Making it work in the real world.} 
@@ -346,10 +366,11 @@ Water Resources Research 32 (3), 679–693.
 Stekhoven, D. J., \& Bühlmann, P. (2011).
 \textit{MissForest: non-parametric missing value imputation for mixed-type data.}
 Bioinformatics, 28(1):112-118.
-\bibitem{EM}
-Geoffrey J. McLachlan, Thriyambakam Krishnan, The EM
-Algorithm and Extensions, Wiley Series in Probability and Statistics,
-1997.
+\bibitem{MICE}
+White, I. R., Royston, P., Wood, M. A. (2010)
+\textit{Multiple imputation using chained equations: Issues and guidance for practice.}
+Stat Med, 30 (2011), pp. 377-399
+
 \end{thebibliography}
 
 \end{document}
