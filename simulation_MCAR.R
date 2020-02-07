@@ -8,9 +8,8 @@ source("Imputation_Models.R")
 pon <- 100
 sampleSize <- 300
 delez_na <- c(0.3, 0.4, 0.5, 0.6)
-moc <- c(1, 2, 5, 8, 12)
-zasnova <- expand.grid(delez_na,  moc, sampleSize)
-zasnova <- do.call(rbind, replicate(pon, zasnova, simplify=FALSE)) %>% `colnames<-`(c("delez_na", "moc_mehanizma", "N"))
+zasnova <- expand.grid(delez_na, sampleSize)
+zasnova <- do.call(rbind, replicate(pon, zasnova, simplify=FALSE)) %>% `colnames<-`(c("delez_na", "N"))
 
 rez <- data.frame()
 for(i in 1:nrow(zasnova)){
@@ -18,10 +17,10 @@ for(i in 1:nrow(zasnova)){
   N.i <- zasnova[i, "N"]
   delezNA.i <- zasnova[i, "delez_na"]
   
-  dataNMAR <- get.data.NMAR(N = N.i, prop.NA = delezNA.i, moc.mehanizma = moc.i)
-  data.NA <- dataNMAR[[1]]
-  data.perfect <- dataNMAR[[2]]
-  data.test <- get.data.NMAR(N = 1200, prop.NA = 0, moc.mehanizma = 0)[[1]]
+  dataMCAR <- get.data.MCAR(N = N.i, prop.NA = delezNA.i)
+  data.NA <- dataMCAR[[1]]
+  data.perfect <- dataMCAR[[2]]
+  data.test <- get.data.MCAR(N = 1200, prop.NA = 0)[[1]]
   
   #1.Perfect 
   perfect.rez <- lda_perfect.cases(data.perfect, data.test)
@@ -49,7 +48,7 @@ for(i in 1:nrow(zasnova)){
 }
 
 rez.df <- as.data.frame(rez)
-melt.df <- melt(rez.df, id = c("delez_na", "moc_mehanizma", "N"))
+melt.df <- melt(rez.df, id = c("delez_na", "N"))
 
 
 #GRAF####
@@ -69,7 +68,7 @@ variable.df <- melt.df %>% group_by(variable, delez_na) %>%
             prop.sd = sd(value))
 
 
-summrise.df <- melt.df %>% group_by(variable, moc_mehanizma, delez_na) %>%
+summrise.df <- melt.df %>% group_by(variable, delez_na) %>%
   summarise(prop.mean = mean(value),
             prop.sd = sd(value))
 
@@ -78,7 +77,6 @@ ggplot(summrise.df,aes(x = delez_na, y = prop.mean, color = variable, group =var
   geom_point()+
   ylab("Povprečni delež uspešnosti")+
   xlab("Delež NA vrednosti")+
-  facet_grid(cols= vars(moc_mehanizma)) + 
   theme(legend.position = "bottom")
 
 

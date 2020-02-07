@@ -169,12 +169,12 @@ get.data.MCAR <- function(N = 300, prop.NA = 0.1, stevilo.skupin= 3){
   podatki <- as.data.frame(rbind(df_1,df_2,df_3))
   podatki$skupina <- as.factor(rep(c(1:3), each = n.skupin))
   colnames(podatki) <- c("X1", "X2", "X3", "X4", "skupina")
-  
+  podatki.plot <- podatki
   
   #Manjkajoče vrednosti
   nMiss <- round(prop.NA *N)
   podatki[sample(N, size = nMiss), 2] <- NA 
   podatki[sample(N, size = nMiss), 3] <- NA 
   podatki[sample(N, size = nMiss), 4] <- NA 
-  return(podatki)
+  return(list(podatki, podatki.plot))
 }

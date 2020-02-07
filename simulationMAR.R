@@ -5,7 +5,7 @@ library(reshape2)
 source("Generation_data.r")
 source("Imputation_Models.R")
 
-pon <- 5
+pon <- 100
 sampleSize <- 300
 delez_na <- c(0.3, 0.4, 0.5, 0.6)
 moc <- c(1, 2, 5, 8, 12)
@@ -41,7 +41,7 @@ for(i in 1:nrow(zasnova)){
               "knn.imputation"= knn.rez, 
               "EM.imputation" = EM.rez, 
               "MICE.imputation" = mice.rez,
-              "RandomForest.impuutation" = rf.rez)
+              "RandomForest.imputation" = rf.rez)
   #print(rezult)
   
   rez <- rbind(rez,c(zasnova[i,], rezult) )
@@ -52,11 +52,20 @@ rez.df <- as.data.frame(rez)
 melt.df <- melt(rez.df, id = c("delez_na", "moc_mehanizma", "N"))
 
 
-#GRAF####
+#####GRAF MAR#####
 
 ggplot(melt.df, aes(x = variable, y = value, color = variable))+
   geom_boxplot()+
-  facet_grid(cols = vars(moc_mehanizma), rows = vars(delez_na))
+  facet_grid(cols = vars(delez_na))+
+  theme(legend.position = "bottom", 
+        axis.text.x = element_text(colour = "white"))+
+  ylab("Delež uspešnosti")+
+  xlab("    ")
+
+variable.df <- melt.df %>% group_by(variable, delez_na) %>%
+  summarise(prop.mean = mean(value),
+            prop.sd = sd(value))
+
 
 summrise.df <- melt.df %>% group_by(variable, moc_mehanizma, delez_na) %>%
   summarise(prop.mean = mean(value),
@@ -65,5 +74,10 @@ summrise.df <- melt.df %>% group_by(variable, moc_mehanizma, delez_na) %>%
 ggplot(summrise.df,aes(x = delez_na, y = prop.mean, color = variable, group =variable)) +
   geom_line()+
   geom_point()+
-  facet_grid(rows= vars(moc_mehanizma))
+  ylab("Povprečni delež uspešnosti")+
+  xlab("Delež NA vrednosti")+
+  facet_grid(cols= vars(moc_mehanizma)) + 
+  theme(legend.position = "bottom")
+
+
 
