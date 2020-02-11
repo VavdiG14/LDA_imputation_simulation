@@ -5,6 +5,7 @@ library("missForest")
 library("mice")
 library("fpc")
 library("DescTools")
+rngseed(45) #Za potrebe funkcije imp.norm
 
 #######MICE 1#############
 lda_mice <- function(miss_df, test_df, m){
@@ -13,10 +14,8 @@ lda_mice <- function(miss_df, test_df, m){
   n.test.data <- nrow(test_df)
   #Imputiram manjkajoče vrednosti z mice
   imp <- mice(df, m = m, printFlag = FALSE) 
-  
   #shranimo vsa imp. podatkovja v long format
   imp_tot <- complete(imp, "long", include = FALSE)
-  
   #pogledamo subset posebaj in primerjamo posteriorno verjetnost podatkov s testni podatkovjem
   post_tot <- NULL
   for(i in 1:m){
@@ -25,7 +24,6 @@ lda_mice <- function(miss_df, test_df, m){
     post_tot <- rbind(post_tot, post)  
   }
   post_tot <- as.data.frame(post_tot)
-  
   #dodam spremenljivko podatkovje
   post_tot[,4] <- as.factor(rep(1:m, each = n.test.data))
   #dodam spremenljivko enota
@@ -88,7 +86,7 @@ lda_knn <- function(miss_df, test_df, k){
 
 #######EM-algoritem############
 
-lda_EM.algoritem <- function(data.train, data.test){
+#lda_EM.algoritem.skupine <- function(data.train, data.test){
   imputiran.dataset <- NULL
   for(i in 1:3){
     n.prva <- first(which(data.test$skupina == i))
@@ -113,6 +111,24 @@ lda_EM.algoritem <- function(data.train, data.test){
   }
   #LDA model z imputiranimi vrednostmi
   em_mod <- lda(skupina ~ X1 + X2 + X3 + X4, imputiran.dataset)
+  em_class <- predict(em_mod, data.test[,1:4])$class
+  
+  #delez pravilno razvrscenih
+  prop <-  mean(em_class==data.test[,5])
+  
+  return(prop)
+}
+
+lda_EM.algoritem <- function(data.train, data.test){
+  #EM-algoritem
+  dataPrep <- prelim.norm(as.matrix(data.train[,1:4]))
+  thetahat <- em.norm(dataPrep, showits = F)
+  EM.matrix <- imp.norm(dataPrep, thetahat)
+  dataEM <- as.data.frame(EM.matrix)
+  dataEM$skupina <- data.train$skupina
+  
+  #LDA model z imputiranimi vrednostmi
+  em_mod <- lda(skupina ~ X1 + X2 + X3 + X4, dataEM)
   em_class <- predict(em_mod, data.test[,1:4])$class
   
   #delez pravilno razvrscenih
