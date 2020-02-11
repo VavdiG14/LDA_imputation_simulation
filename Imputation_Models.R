@@ -5,6 +5,7 @@ library("missForest")
 library("mice")
 library("fpc")
 library("DescTools")
+
 rngseed(45) #Za potrebe funkcije imp.norm
 
 #######MICE 1#############
@@ -87,37 +88,37 @@ lda_knn <- function(miss_df, test_df, k){
 #######EM-algoritem############
 
 #lda_EM.algoritem.skupine <- function(data.train, data.test){
-  imputiran.dataset <- NULL
-  for(i in 1:3){
-    n.prva <- first(which(data.test$skupina == i))
-    n.zadnja <- last(which(data.test$skupina == i))
-    velikost.skupine <- (n.zadnja - n.prva) + 1
-    i.skupina <- data.train[n.prva:n.zadnja,]
-    
-    #EM-algoritem
-    dataPrep <- prelim.norm(as.matrix(i.skupina[,1:4]))
-    thetahat <- em.norm(dataPrep, showits = F)
-    resEM <- getparam.norm(dataPrep, thetahat, corr=TRUE)
-    EM.data.incomplite <- as.data.frame(mvrnorm(n = velikost.skupine, mu = resEM$mu, Sigma = resEM$r))
-    colnames(EM.data.incomplite) <- c("X1", "X2", "X3", "X4")
-    EM.data.incomplite$skupina <- rep(i, velikost.skupine)
-    popravljen.dataSet <- i.skupina
-    popravljen.dataSet[which(is.na(i.skupina[,1])),1] <- EM.data.incomplite[which(is.na(i.skupina[,1])),1]
-    popravljen.dataSet[which(is.na(i.skupina[,2])),2] <- EM.data.incomplite[which(is.na(i.skupina[,2])),2]
-    popravljen.dataSet[which(is.na(i.skupina[,3])),3] <- EM.data.incomplite[which(is.na(i.skupina[,3])),3]
-    popravljen.dataSet[which(is.na(i.skupina[,4])),4] <- EM.data.incomplite[which(is.na(i.skupina[,4])),4]
-    #zdaj imamo imputiran dataset za i.to skupino
-    imputiran.dataset <- rbind(imputiran.dataset, popravljen.dataSet) #shranimo
-  }
-  #LDA model z imputiranimi vrednostmi
-  em_mod <- lda(skupina ~ X1 + X2 + X3 + X4, imputiran.dataset)
-  em_class <- predict(em_mod, data.test[,1:4])$class
-  
-  #delez pravilno razvrscenih
-  prop <-  mean(em_class==data.test[,5])
-  
-  return(prop)
-}
+# imputiran.dataset <- NULL
+# for(i in 1:3){
+#   n.prva <- first(which(data.test$skupina == i))
+#   n.zadnja <- last(which(data.test$skupina == i))
+#   velikost.skupine <- (n.zadnja - n.prva) + 1
+#   i.skupina <- data.train[n.prva:n.zadnja,]
+#     
+#     #EM-algoritem
+#     dataPrep <- prelim.norm(as.matrix(i.skupina[,1:4]))
+#     thetahat <- em.norm(dataPrep, showits = F)
+#     resEM <- getparam.norm(dataPrep, thetahat, corr=TRUE)
+#     EM.data.incomplite <- as.data.frame(mvrnorm(n = velikost.skupine, mu = resEM$mu, Sigma = resEM$r))
+#     colnames(EM.data.incomplite) <- c("X1", "X2", "X3", "X4")
+#     EM.data.incomplite$skupina <- rep(i, velikost.skupine)
+#     popravljen.dataSet <- i.skupina
+#     popravljen.dataSet[which(is.na(i.skupina[,1])),1] <- EM.data.incomplite[which(is.na(i.skupina[,1])),1]
+#     popravljen.dataSet[which(is.na(i.skupina[,2])),2] <- EM.data.incomplite[which(is.na(i.skupina[,2])),2]
+#     popravljen.dataSet[which(is.na(i.skupina[,3])),3] <- EM.data.incomplite[which(is.na(i.skupina[,3])),3]
+#     popravljen.dataSet[which(is.na(i.skupina[,4])),4] <- EM.data.incomplite[which(is.na(i.skupina[,4])),4]
+#     #zdaj imamo imputiran dataset za i.to skupino
+#     imputiran.dataset <- rbind(imputiran.dataset, popravljen.dataSet) #shranimo
+#   }
+#   #LDA model z imputiranimi vrednostmi
+#   em_mod <- lda(skupina ~ X1 + X2 + X3 + X4, imputiran.dataset)
+#   em_class <- predict(em_mod, data.test[,1:4])$class
+#   
+#   #delez pravilno razvrscenih
+#   prop <-  mean(em_class==data.test[,5])
+#   
+#   return(prop)
+# }
 
 lda_EM.algoritem <- function(data.train, data.test){
   #EM-algoritem
@@ -125,6 +126,7 @@ lda_EM.algoritem <- function(data.train, data.test){
   thetahat <- em.norm(dataPrep, showits = F)
   EM.matrix <- imp.norm(dataPrep, thetahat)
   dataEM <- as.data.frame(EM.matrix)
+  colnames(dataEM) <- c("X1", "X2", "X3", "X4")
   dataEM$skupina <- data.train$skupina
   
   #LDA model z imputiranimi vrednostmi
