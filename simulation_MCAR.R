@@ -5,7 +5,7 @@ library(reshape2)
 source("Generation_data.r")
 source("Imputation_Models.R")
 
-pon <- 100
+pon <- 500
 sampleSize <- 300
 delez_na <- c(0.3, 0.4, 0.5, 0.6)
 zasnova <- expand.grid(delez_na, sampleSize)
@@ -48,7 +48,10 @@ for(i in 1:nrow(zasnova)){
 }
 
 rez.df <- as.data.frame(rez)
+
 melt.df <- melt(rez.df, id = c("delez_na", "N"))
+
+#saveRDS(rez.df, "shraniMCAR.RDS")
 
 
 #GRAF####
