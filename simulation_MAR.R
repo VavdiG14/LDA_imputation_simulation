@@ -5,7 +5,7 @@ library(reshape2)
 source("Generation_data.r")
 source("Imputation_Models.R")
 
-pon <- 100
+pon <- 500
 sampleSize <- 300
 delez_na <- c(0.3, 0.4, 0.5, 0.6)
 moc <- c(1, 2, 5, 8, 12)
@@ -13,6 +13,7 @@ zasnova <- expand.grid(delez_na,  moc, sampleSize)
 zasnova <- do.call(rbind, replicate(pon, zasnova, simplify=FALSE)) %>% `colnames<-`(c("delez_na", "moc_mehanizma", "N"))
 
 rez <- data.frame()
+start_time <- Sys.time()
 for(i in 1:nrow(zasnova)){
   moc.i <- zasnova[i, "moc_mehanizma"]
   N.i <- zasnova[i, "N"]
@@ -23,6 +24,7 @@ for(i in 1:nrow(zasnova)){
   data.perfect <- dataMAR[[2]]
   data.test <- get.data.MAR(N = 1200, prop.NA = 0, moc.mehanizma = 0)[[1]]
   
+  tryCatch({
   #1.Perfect 
   perfect.rez <- lda_perfect.cases(data.perfect, data.test)
   #2.Complete
@@ -42,6 +44,9 @@ for(i in 1:nrow(zasnova)){
               "EM.imputation" = EM.rez, 
               "MICE.imputation" = mice.rez,
               "RandomForest.imputation" = rf.rez)
+  },rezult =c("perfect.data" = 10, "complete.data" = 10,"knn.imputation"= 10, 
+              "EM.imputation" = 10, "MICE.imputation" = 10,"RandomForest.imputation" = 10)
+  )
   #print(rezult)
   
   rez <- rbind(rez,c(zasnova[i,], rezult) )
@@ -51,6 +56,7 @@ for(i in 1:nrow(zasnova)){
 rez.df <- as.data.frame(rez)
 melt.df <- melt(rez.df, id = c("delez_na", "moc_mehanizma", "N"))
 
+saveRDS(rez.df, "shraniMAR.RDS")
 
 #####GRAF MAR#####
 
