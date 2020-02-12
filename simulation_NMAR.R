@@ -55,11 +55,14 @@ end_time <- Sys.time()
 cas <- end_time - start_time
 
 rez.df <- as.data.frame(rez)
-melt.df <- melt(rez.df, id = c("delez_na", "moc_mehanizma", "N"))
 
 saveRDS(rez.df, "shraniNMAR.RDS")
 
 #GRAF####
+rez.df <-readRDS("data/shraniNMAR.RDS")
+
+melt.df <- melt(rez.df, id = c("delez_na", "moc_mehanizma", "N"))
+
 
 #####GRAF MAR#####
 

@@ -54,11 +54,15 @@ for(i in 1:nrow(zasnova)){
 }
 
 rez.df <- as.data.frame(rez)
-melt.df <- melt(rez.df, id = c("delez_na", "moc_mehanizma", "N"))
 
 saveRDS(rez.df, "shraniMAR.RDS")
 
 #####GRAF MAR#####
+
+rez.df <-readRDS("data/shraniMAR.RDS")
+
+melt.df <- melt(rez.df, id = c("delez_na", "moc_mehanizma", "N"))
+
 
 ggplot(melt.df, aes(x = variable, y = value, color = variable))+
   geom_boxplot()+
