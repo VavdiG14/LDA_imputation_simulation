@@ -29,7 +29,7 @@ for(i in 1:nrow(zasnova)){
   perfect.rez <- lda_perfect.cases(data.perfect, data.test)
   #2.Complete
   complete.cas.rez <- lda_complete.cases(data.NA, data.test)
-  #3. KNN
+  #3. KNNs
   knn.rez <- lda_knn(data.NA, data.test, k = 10)
   #4. EM-algoritem
   EM.rez <- lda_EM.algoritem(data.NA, data.test)
@@ -56,7 +56,7 @@ cas <- end_time - start_time
 
 rez.df <- as.data.frame(rez)
 
-saveRDS(rez.df, "shraniNMAR.RDS")
+saveRDS(rez.df, "data/shraniNMAR.RDS")
 
 #GRAF####
 rez.df <-readRDS("data/shraniNMAR.RDS")
