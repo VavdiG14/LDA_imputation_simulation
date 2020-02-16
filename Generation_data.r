@@ -1,52 +1,51 @@
 library(MASS)
 
-get.data.MAR <- function(N = 300, prop.NA = 0.1, moc.mehanizma = 4, stevilo.skupin= 3, plot=F){
-  #INPUT
-  #N - stevilo enot
-  #prop.NA - razmerje NA vrednosti
-  #moc.mehanizma - moc mehanizma
-  #OUTPUT:
-  #podatki - dataset s NA vrednosti
-  #podatki.plot - perfect dataset
-
-  #Generiranje podatkov
-  n.skupin <- round(N/stevilo.skupin, 0)
-  sk <- c(1:3)
+generation.data <- function(N = 300){
   podatki <- NULL
-  mi <- rep(0,4)
-  mi2 <- c(0.5,0.5,1,4)
-  mi3 <- c(1,1,2,6)
-  mi.l <- list(mi,mi2,mi3)
+  n.skupin <- round(N/3, 0)
+  mi.1 <- c(0, 0, 0, 0) 
+  mi.2 <- c(0.5, 0.5, 1, 4)
+  mi.3 <- c(1, 1, 2, 6)
+  povprecje.skupin <- list(mi.1, mi.2, mi.3)
   r <- 0.3 #smisel življenja
-  Sigma <- rbind(c(1, r, r, r),
+  Sigma <- rbind(c(1.0, r, r, r),
                  c(r, 1.0, r, r),
                  c(r, r, 1.0, r),
                  c(r, r, r, 1.0)
   )
-
   for(i.mi in 1:3){
-    dataset <- as.data.frame(mvrnorm(n = n.skupin, mu = mi.l[[i.mi]], Sigma = Sigma))
-    dataset$skupina <- rep(sk[i.mi], n.skupin)
+    dataset <- as.data.frame(mvrnorm(n = n.skupin, mu = povprecje.skupin[[i.mi]], Sigma = Sigma))
+    dataset$skupina <- rep(i.mi, n.skupin)
     podatki <- rbind(podatki, dataset)
   }
   podatki <- as.data.frame(podatki)
   colnames(podatki) <- c("X1", "X2", "X3", "X4", "skupina")
-  podatki.plot <- podatki
+  return(podatki)
+}
 
+get.NA.MAR <- function(dataSet, prop.NA = 0.1, moc.mehanizma = 4, plot=F){
+  #INPUT:
+  #dataSet - podatki, katerim želim nastaviti manjkajoče vrednosti
+  #prop.NA - razmerje NA vrednosti
+  #moc.mehanizma - moč mehanizma
+  #OUTPUT:
+  #podatki - datasets NA vrednostmi
+  
+  podatki.plot <- dataSet
+  konst <- 3.14
+  N <- nrow(dataSet)
   #Manjkajoče vrednosti
   nMiss <- round(prop.NA *N)
-  verjetnosti.na <- abs((podatki[,1])^moc.mehanizma/(sum(podatki[,1]))^moc.mehanizma)
+  verjetnosti.na <- (dataSet[,1] - min(dataSet[,1]) + konst)^moc.mehanizma/(sum(dataSet[,1]))^moc.mehanizma
 
   set.na.2 <- sample(length(verjetnosti.na), size = nMiss, prob = verjetnosti.na)
-  podatki[set.na.2, 2] <- NA #X1 vpliva na X2
+  dataSet[set.na.2, 2] <- NA #X1 vpliva na X2
 
   set.na.3 <- sample(length(verjetnosti.na), size = nMiss, prob = verjetnosti.na)
-  podatki[set.na.3, 3] <- NA #X1 vpliva na X3
+  dataSet[set.na.3, 3] <- NA #X1 vpliva na X3
 
   set.na.4 <- sample(length(verjetnosti.na), size = nMiss, prob = verjetnosti.na)
-  podatki[set.na.4, 4] <- NA #X1 vpliva na X4
-
-
+  dataSet[set.na.4, 4] <- NA #X1 vpliva na X4
   #za risanje slik
   if(plot){
     podatki.plot$na.2<- 1 #za risanje grafa
@@ -68,60 +67,35 @@ get.data.MAR <- function(N = 300, prop.NA = 0.1, moc.mehanizma = 4, stevilo.skup
                main = "Povezanost med spremenljivko X1 \n in manjkajocimi podatki X4",
                xlab = "X1", ylab = "X4")
     legend("bottomright", legend = c("obstojeci", "manjkajoci"), col= c(1,4), pch = 1)
-    return(list(podatki, p1,p2,p3))
+    return(dataSet)
   }
   else{
-    return(list(podatki, podatki.plot))
+    return(dataSet)
   }
 }
 
-
-get.data.NMAR <- function(N = 300, prop.NA = 0.1, moc.mehanizma = 4, stevilo.skupin= 3, plot=F){
+get.NA.NMAR <- function(dataSet, prop.NA = 0.1, moc.mehanizma = 4, plot=F){
   #INPUT:
-  #N - stevilo enot
+  #dataSet - podatki, katerim želim nastaviti manjkajoče vrednosti
   #prop.NA - razmerje NA vrednosti
-  #moc.mehanizma - moc mehanizma
+  #moc.mehanizma - moč mehanizma
   #OUTPUT:
-  #podatki - dataset s NA vrednosti
-  #podatki.plot - perfect dataset
-
-  #Generiranje podatkov
-  n.skupin <- round(N/stevilo.skupin, 0)
-  n.skupin <- round(N/stevilo.skupin, 0)
-  sk <- c(1:3)
-  podatki <- NULL
-  mi <- rep(0,4)
-  mi2 <- c(0.5,0.5,1,4)
-  mi3 <- c(1,1,2,6)
-  mi.l <- list(mi,mi2,mi3)
-  r <- 0.3 #smisel življenja
-  Sigma <- rbind(c(1, r, r, r),
-                 c(r, 1.0, r, r),
-                 c(r, r, 1.0, r),
-                 c(r, r, r, 1.0)
-  )
-
-  for(i.mi in 1:3){
-    dataset <- as.data.frame(mvrnorm(n = n.skupin, mu = mi.l[[i.mi]], Sigma = Sigma))
-    dataset$skupina <- rep(sk[i.mi], n.skupin)
-    podatki <- rbind(podatki, dataset)
-  }
-  podatki <- as.data.frame(podatki)
-  colnames(podatki) <- c("X1", "X2", "X3", "X4", "skupina")
-  podatki.plot <- podatki
-
-  #Manjkajoče vrednosti
+  #podatki - datasets NA vrednostmi
+  
+  podatki.plot <- dataSet #za risanje
+  konst <- 3.14
+  N <- nrow(dataSet)
   nMiss <- round(prop.NA * N)
-
-  verjetnosti.na <- (podatki[,2])^moc.mehanizma / (sum(podatki[,2]))^moc.mehanizma
+  
+  verjetnosti.na <- (dataSet[,2] - min(dataSet[,2]) + konst)^moc.mehanizma/(sum(dataSet[,2]))^moc.mehanizma
   set.na.2 <- sample(length(verjetnosti.na), size = nMiss, prob = abs(verjetnosti.na))
   podatki[set.na.2, 2] <- NA #X2 vpliva na X2
 
-  verjetnosti.na.3 <- (podatki[,3])^moc.mehanizma / (sum(podatki[,3]))^moc.mehanizma
+  verjetnosti.na.3 <-  (dataSet[,3] - min(dataSet[,3]) + konst)^moc.mehanizma/(sum(dataSet[,3]))^moc.mehanizma
   set.na.3 <- sample(length(verjetnosti.na.3), size = nMiss, prob = abs(verjetnosti.na.3))
   podatki[set.na.3, 3] <- NA #X3 vpliva na X3
 
-  verjetnosti.na.4 <- (podatki[,4])^moc.mehanizma/(sum(podatki[,4]))^moc.mehanizma
+  verjetnosti.na.4 <-  (dataSet[,4] - min(dataSet[,4]) + konst)^moc.mehanizma/(sum(dataSet[,4]))^moc.mehanizma
   set.na.4 <- sample(length(verjetnosti.na.4), size = nMiss, prob = abs(verjetnosti.na.4))
   podatki[set.na.4, 4] <- NA #X4 vpliva na X4
 
@@ -146,51 +120,36 @@ get.data.NMAR <- function(N = 300, prop.NA = 0.1, moc.mehanizma = 4, stevilo.sku
                main = "Povezanost med spremenljivko X1 \n in manjkajocimi podatki X4",
                xlab = "X1", ylab = "X4")
     legend("bottomright", legend = c("obstojeci", "manjkajoci"), col= c(1,4), pch = 1)
-    return(list(podatki, p1,p2,p3))
+    return(dataSet)
   }
   else{
-    return(list(podatki, podatki.plot))
+    return(dataSet)
   }
 }
 
-
-get.data.MCAR <- function(N = 300, prop.NA = 0.1, stevilo.skupin= 3){
+get.NA.MCAR <- function(dataSet, prop.NA = 0.1){
   #INPUT:
   #N - stevilo enot v skupini
   #prop.NA - razmerje NA vrednosti
   #OUTPUT:
   #podatki - datasets NA vrednostmi
-
-  #Generiranje podatkov
-  n.skupin <- round(N/stevilo.skupin, 0)
-  n.skupin <- round(N/stevilo.skupin, 0)
-  sk <- c(1:3)
-  podatki <- NULL
-  mi <- rep(0,4)
-  mi2 <- c(0.5,0.5,1,4)
-  mi3 <- c(1,1,2,6)
-  mi.l <- list(mi,mi2,mi3)
-  r <- 0.3 #smisel življenja
-  Sigma <- rbind(c(1, r, r, r),
-                 c(r, 1.0, r, r),
-                 c(r, r, 1.0, r),
-                 c(r, r, r, 1.0)
-  )
-
-  for(i.mi in 1:3){
-    dataset <- as.data.frame(mvrnorm(n = n.skupin, mu = mi.l[[i.mi]], Sigma = Sigma))
-    dataset$skupina <- rep(sk[i.mi], n.skupin)
-    podatki <- rbind(podatki, dataset)
-  }
-  podatki <- as.data.frame(podatki)
-  colnames(podatki) <- c("X1", "X2", "X3", "X4", "skupina")
-  podatki.plot <- podatki
-
-
-  #Manjkajoče vrednosti
+  N <- nrow(dataSet)
   nMiss <- round(prop.NA *N)
-  podatki[sample(N, size = nMiss), 2] <- NA
-  podatki[sample(N, size = nMiss), 3] <- NA
-  podatki[sample(N, size = nMiss), 4] <- NA
-  return(list(podatki, podatki.plot))
+  dataSet[sample(N, size = nMiss), 2] <- NA
+  dataSet[sample(N, size = nMiss), 3] <- NA
+  dataSet[sample(N, size = nMiss), 4] <- NA
+  return(dataSet)
+}
+
+
+get.NA <- function(vrsta.mehanizma, dataSet, prop.NA = 0.1, moc.mehanizma = 0){
+  if(vrsta.mehanizma == "MCAR"){
+    return(get.NA.MCAR(dataSet = dataSet, prop.NA = prop.NA))
+  }
+  else if(vrsta.mehanizma == "MAR"){
+    return(get.NA.MAR(dataSet = dataSet, prop.NA = prop.NA, moc.mehanizma = moc.mehanizma))
+  }
+  else if(vrsta.mehanizma == "NMAR"){
+    return(get.NA.NMAR(dataSet = dataSet, prop.NA = prop.NA, moc.mehanizma = moc.mehanizma))
+  }
 }
