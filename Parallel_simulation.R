@@ -24,14 +24,12 @@ clusterExport(cl, c("lda_mice", "lda_knn", "lda_EM.algoritem", "lda_rf",
 registerDoParallel(cl)
 
 
-pon <- 2
+pon <- 10
 sampleSize <- 300
 delez_na <- c(0.3, 0.4, 0.5, 0.6)
 moc <- c(1, 2, 5, 8, 12)
-zasnova <- expand.grid(delez_na,  moc, mehanizem)
+zasnova <- expand.grid(delez_na,  moc)
 zasnova <- do.call(rbind, replicate(pon, zasnova, simplify=FALSE)) %>% `colnames<-`(c("delez_na", "moc_mehanizma"))
-
-
 
 start_time <- Sys.time()
 rez <- foreach(i = 1:nrow(zasnova), .combine = "rbind", 
