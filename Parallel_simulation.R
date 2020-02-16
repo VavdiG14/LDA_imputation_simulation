@@ -24,7 +24,7 @@ clusterExport(cl, c("lda_mice", "lda_knn", "lda_EM.algoritem", "lda_rf",
 registerDoParallel(cl)
 
 
-pon <- 10
+pon <- 500
 sampleSize <- 300
 delez_na <- c(0.3, 0.4, 0.5, 0.6)
 moc <- c(1, 2, 5, 8, 12)
