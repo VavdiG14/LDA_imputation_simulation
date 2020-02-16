@@ -1,4 +1,6 @@
 library(reshape2)
+library(dplyr)
+library(ggplot2)
 
 #MAR
 rez.df.MAR <-readRDS("data/shraniMAR.RDS")
