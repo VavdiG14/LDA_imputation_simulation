@@ -150,14 +150,14 @@ get.data.MCAR <- function(N = 300, prop.NA = 0.1, stevilo.skupin= 3){
   #prop.NA - razmerje NA vrednosti
   #OUTPUT:
   #podatki - datasets NA vrednostmi
-  
+  r = 0.3
   #Generiranje podatkov
   n.skupin <- round(N/stevilo.skupin, 0)
   dataset <- NULL
-  mi_1 <- rep(0,4)
-  mi_2 <- rep(2,4)
-  mi_3 <- rep(5,4)
-  r <- 0.3 #smisel življenja
+  mi_1 <- rep(3,4)
+  mi_2 <- rep(5,4)
+  mi_3 <- rep(7,4)
+  #r <- 0.3 #smisel življenja
   Sigma <- rbind(c(1, r, r, r),
                  c(r, 1.0, r, r),
                  c(r, r, 1.0, r),
