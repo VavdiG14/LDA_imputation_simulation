@@ -53,7 +53,7 @@ rez <- foreach(i = 1:nrow(zasnova), .combine = "rbind",
                                       "complete.data" = pair,
                                       "knn.imputation"= knn, 
                                       "EM.imputation" = em, 
-                                      "MICE.imputation" = mice$prop,
+                                      "MICE.imputation" = mice,
                                       "RandomForest.imputation" = rf$prop)
                              }
 end_time <- Sys.time()   

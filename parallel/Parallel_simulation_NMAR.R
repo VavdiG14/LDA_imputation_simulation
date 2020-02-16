@@ -47,12 +47,12 @@ rez <- foreach(i = 1:nrow(zasnova), .combine = "rbind",
                   knn <- lda_knn(data.NA, df.test, k =10)
                   mice <- lda_mice(data.NA, df.test, 10)
                   cbind(zasnova[i,], 
-                        "pair" = pair,
-                        "comp" = comp, 
-                        "rf" = rf$prop, 
-                        "em" = em, 
-                        "knn" = knn, 
-                        "mice" = mice$prop)
+                        "perfect.data" = comp,
+                        "complete.data" = pair,
+                        "knn.imputation"= knn, 
+                        "EM.imputation" = em, 
+                        "MICE.imputation" = mice,
+                        "RandomForest.imputation" = rf$prop)
                           }
 
 end_time <- Sys.time()    
