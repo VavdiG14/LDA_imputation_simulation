@@ -23,7 +23,7 @@ clusterExport(cl, c("lda_mice", "lda_knn", "lda_EM.algoritem", "lda_rf",
 registerDoParallel(cl)
 
 
-pon <- 500
+pon <- 1
 sampleSize <- 300
 delez_na <- c(0.3, 0.4, 0.5, 0.6)
 moc <- c(1, 2, 5, 8, 12)
@@ -49,14 +49,17 @@ rez <- foreach(i = 1:nrow(zasnova), .combine = "rbind",
                                knn <- lda_knn(data.NA, df.test, k =10)
                                mice <- lda_mice(data.NA, df.test, 10)
                                cbind(zasnova[i,], 
-                                     "pair" = pair,
-                                     "comp" = comp, 
-                                     "rf" = rf$prop, 
-                                     "em" = em, 
-                                     "knn" = knn, 
-                                     "mice" = mice$prop)
+                                     "perfect.data" = comp,
+                                      "complete.data" = pair,
+                                      "knn.imputation"= knn, 
+                                      "EM.imputation" = em, 
+                                      "MICE.imputation" = mice$prop,
+                                      "RandomForest.imputation" = rf$prop)
                              }
-end_time <- Sys.time()    
-
+end_time <- Sys.time()   
+time.MAR <- end_time - start_time
+time.MAR
 stopCluster(cl)
 registerDoSEQ()
+
+saveRDS(object = as.data.frame(rez), paste("data/data_MAR_", Sys.Date(),".RDS", sep = ""))
