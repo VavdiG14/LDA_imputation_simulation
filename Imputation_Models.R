@@ -9,79 +9,38 @@ library("DescTools")
 rngseed(45) #Za potrebe funkcije imp.norm
 
 #######MICE 1#############
-lda_mice <- function(miss_df, test_df, m, maxit){
-
-
-#Imputiram manjkajoče vrednosti z mice
-imp <- mice(miss_df, m = m, printFlag = FALSE, maxit = maxit) 
-
-#Pogledam summary imputacij (ce predhodno definiram, da je spr. faktor, mi sam da npr., logisticno regresijo)
-
-#Vidimo imputirane vrednosti iz vseh 5ih podatkovij za sprem X2 -> bi bilo smiselno pogledati konvergenco?
-imp$imp$X2
-
-#shranimo vsa imp. podatkovja v long format
-imp_tot <- complete(imp, "long", include = FALSE)
-
-#v vektor shranim napovedane razrede za vsa podatkovja (po stolpcih so podatkovja)
-
-xclas_tot <- NULL
-for(i in 1:m){
-  mod <- lda(skupina ~ X1 + X2 + X3 + X4, imp_tot[(i-1)*nrow(miss_df)+1:((i-1)*nrow(miss_df)+nrow(miss_df)),])
-  xclas <- cbind(predict(mod, test_df[,1:4])$class)
-  xclas_tot <- cbind(xclas_tot, xclas)  
-}
-
-#Glasujem (pogledam) katerih skupin po vrstici (enoti) je največ
-
-imp_class <- NULL
-for(i in 1:nrow(xclas_tot)){
-  clas <- if(length(xclas_tot[which(xclas_tot[i,] == 1)]) > length(xclas_tot[which(xclas_tot[i,] == 2)]) & 
-                   length(xclas_tot[which(xclas_tot[i,] == 1)]) > length(xclas_tot[which(xclas_tot[i,] == 3)])){
-          "1"
-          } else if(length(xclas_tot[which(xclas_tot[i,] == 2)]) > length(xclas_tot[which(xclas_tot[i,] == 1)]) &
-                           length(xclas_tot[which(xclas_tot[i,] == 2)]) > length(xclas_tot[which(xclas_tot[i,] == 3)])){
-          "2"
-          } else{
-          "3"
-          }
-  imp_class <- c(imp_class, clas)
-}
-
-
-# #dodam spremenljivko podatkovje
-# post_tot[,4] <- as.factor(rep(1:m, each = nrow(test_df)))
-# 
-# #dodam spremenljivko enota
-# post_tot[,5] <- as.factor(rep(1:nrow(test_df), times = m))
-# 
-# 
-# #povprečim verjetnosti po vseh podatkovjih
-# imp_agg_post <- aggregate(post_tot[,1:3], list(post_tot$V5), mean)
-# imp_agg_post <- imp_agg_post[,-1]
-# 
-# #določim skupino glede na največjo verjetnost
-# imp_class <- NULL
-# for(i in 1:nrow(imp_agg_post)){
-#   class <- if(imp_agg_post[i,1] == max(imp_agg_post[i,])){
-#     1
-#   }else if(imp_agg_post[i,2] == max(imp_agg_post[i,])){
-#     2
-#   } else{3}
-#   imp_class <- c(imp_class,class)
-# }
-
-#delez pravilno razvrscenih
-lda_prop <- mean(imp_class==test_df[,5])
-
-
-
-
-# k <- list(m = m, class = imp_class, prop = lda_prop, con_X2 = aggregate(post_tot[,1:3], list(post_tot$V4), mean)[,2],
-#           con_X3 = aggregate(post_tot[,1:3], list(post_tot$V4), mean)[,3],
-#           con_X4 = aggregate(post_tot[,1:3], list(post_tot$V4), mean)[,4])
-
-return(lda_prop)
+lda_mice <- function(miss_df, test_df, m=10, maxit=20){
+  #Imputiram manjkajoče vrednosti z mice
+  imp <- mice(miss_df, m = m, printFlag = FALSE, maxit = maxit) 
+  #Pogledam summary imputacij (ce predhodno definiram, da je spr. faktor, mi sam da npr., logisticno regresijo)
+  #Vidimo imputirane vrednosti iz vseh 5ih podatkovij za sprem X2 -> bi bilo smiselno pogledati konvergenco?
+  imp$imp$X2
+  #shranimo vsa imp. podatkovja v long format
+  imp_tot <- complete(imp, "long", include = FALSE)
+  #v vektor shranim napovedane razrede za vsa podatkovja (po stolpcih so podatkovja)
+  xclas_tot <- NULL
+  for(i in 1:m){
+    mod <- lda(skupina ~ X1 + X2 + X3 + X4, imp_tot[(i-1)*nrow(miss_df)+1:((i-1)*nrow(miss_df)+nrow(miss_df)),])
+    xclas <- cbind(predict(mod, test_df[,1:4])$class)
+    xclas_tot <- cbind(xclas_tot, xclas)  
+  }
+  #Glasujem (pogledam) katerih skupin po vrstici (enoti) je največ
+  imp_class <- NULL
+  for(i in 1:nrow(xclas_tot)){
+    clas <- if(length(xclas_tot[which(xclas_tot[i,] == 1)]) > length(xclas_tot[which(xclas_tot[i,] == 2)]) & 
+                     length(xclas_tot[which(xclas_tot[i,] == 1)]) > length(xclas_tot[which(xclas_tot[i,] == 3)])){
+            "1"
+            } else if(length(xclas_tot[which(xclas_tot[i,] == 2)]) > length(xclas_tot[which(xclas_tot[i,] == 1)]) &
+                             length(xclas_tot[which(xclas_tot[i,] == 2)]) > length(xclas_tot[which(xclas_tot[i,] == 3)])){
+            "2"
+            } else{
+            "3"
+            }
+    imp_class <- c(imp_class, clas)
+  }
+  #delez pravilno razvrscenih
+  lda_prop <- mean(imp_class==test_df[,5])
+  return(lda_prop)
 }
 
 
@@ -179,3 +138,22 @@ lda_perfect.cases <- function(perfect_df, test_df){
   return(prop)
 }
 
+
+
+
+make.imputation <- function(data.perfect, data.NA, df.test){
+  comp <- lda_perfect.cases(data.perfect, df.test)
+  pair <- lda_complete.cases(data.NA, df.test)
+  rf <- lda_rf(data.NA, df.test)
+  em <- lda_EM.algoritem(data.NA, df.test)
+  knn <- lda_knn(data.NA, df.test, k =10)
+  mice <- lda_mice(data.NA, df.test)
+  lda.mean.rez <- c(
+        "perfect.data" = comp,
+        "complete.data" = pair,
+        "knn.imputation"= knn, 
+        "EM.imputation" = em, 
+        "MICE.imputation" = mice,
+        "RandomForest.imputation" = rf$prop)
+  return(lda.mean.rez)
+}

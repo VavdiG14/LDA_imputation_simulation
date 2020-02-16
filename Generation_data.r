@@ -89,15 +89,15 @@ get.NA.NMAR <- function(dataSet, prop.NA = 0.1, moc.mehanizma = 4, plot=F){
   
   verjetnosti.na <- (dataSet[,2] - min(dataSet[,2]) + konst)^moc.mehanizma/(sum(dataSet[,2]))^moc.mehanizma
   set.na.2 <- sample(length(verjetnosti.na), size = nMiss, prob = abs(verjetnosti.na))
-  podatki[set.na.2, 2] <- NA #X2 vpliva na X2
+  dataSet[set.na.2, 2] <- NA #X2 vpliva na X2
 
   verjetnosti.na.3 <-  (dataSet[,3] - min(dataSet[,3]) + konst)^moc.mehanizma/(sum(dataSet[,3]))^moc.mehanizma
   set.na.3 <- sample(length(verjetnosti.na.3), size = nMiss, prob = abs(verjetnosti.na.3))
-  podatki[set.na.3, 3] <- NA #X3 vpliva na X3
+  dataSet[set.na.3, 3] <- NA #X3 vpliva na X3
 
   verjetnosti.na.4 <-  (dataSet[,4] - min(dataSet[,4]) + konst)^moc.mehanizma/(sum(dataSet[,4]))^moc.mehanizma
   set.na.4 <- sample(length(verjetnosti.na.4), size = nMiss, prob = abs(verjetnosti.na.4))
-  podatki[set.na.4, 4] <- NA #X4 vpliva na X4
+  dataSet[set.na.4, 4] <- NA #X4 vpliva na X4
 
   #za risanje slik
   if(plot){
@@ -142,14 +142,3 @@ get.NA.MCAR <- function(dataSet, prop.NA = 0.1){
 }
 
 
-get.NA <- function(vrsta.mehanizma, dataSet, prop.NA = 0.1, moc.mehanizma = 0){
-  if(vrsta.mehanizma == "MCAR"){
-    return(get.NA.MCAR(dataSet = dataSet, prop.NA = prop.NA))
-  }
-  else if(vrsta.mehanizma == "MAR"){
-    return(get.NA.MAR(dataSet = dataSet, prop.NA = prop.NA, moc.mehanizma = moc.mehanizma))
-  }
-  else if(vrsta.mehanizma == "NMAR"){
-    return(get.NA.NMAR(dataSet = dataSet, prop.NA = prop.NA, moc.mehanizma = moc.mehanizma))
-  }
-}
