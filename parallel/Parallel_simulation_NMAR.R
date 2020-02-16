@@ -53,8 +53,14 @@ rez <- foreach(i = 1:nrow(zasnova), .combine = "rbind",
                         "em" = em, 
                         "knn" = knn, 
                         "mice" = mice$prop)
-}
+                          }
+
 end_time <- Sys.time()    
+time.NMAR <- end_time - start_time
+time.NMAR
 
 stopCluster(cl)
 registerDoSEQ()
+
+saveRDS(object = as.data.frame(rez), paste("data/data_NMAR_", Sys.Date(),".RDS", sep = ""))
+

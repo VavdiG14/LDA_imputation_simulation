@@ -54,6 +54,10 @@ rez <- foreach(i = 1:nrow(zasnova), .combine = "rbind",
                                      "mice" = mice$prop)
                              }
 end_time <- Sys.time()    
-
+time.MCAR <- end_time - start_time
+time.MCAR
 stopCluster(cl)
 registerDoSEQ()
+
+saveRDS(object = as.data.frame(rez), paste("data/data_MCAR_", Sys.Date(),".RDS", sep = ""))
+
