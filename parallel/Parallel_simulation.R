@@ -1,6 +1,6 @@
 #PARALENE SIMULACIJE
-source("Generation_data.r")
-source("Imputation_Models.R")
+source("simulation/Generation_data.r")
+source("simulation/Imputation_Models.R")
 library(parallel)
 library(doParallel)
 library(gridExtra)
@@ -18,7 +18,7 @@ cl <- makeCluster(no_cores)
 # 
 # # registriraj "parallel beckend"
 clusterExport(cl, c("lda_mice", "lda_knn", "lda_EM.algoritem", "lda_rf",
-                    "lda_complete.cases", "lda_perfect.cases", "generation.data",
+                    "lda_complete.cases", "lda_perfect.cases", "generation.data.stara",
                     "get.NA.MAR", "get.NA.NMAR", "get.NA.MCAR", "make.imputation"))
 
 registerDoParallel(cl)
@@ -32,14 +32,14 @@ zasnova <- expand.grid(delez_na,  moc)
 zasnova <- do.call(rbind, replicate(pon, zasnova, simplify=FALSE)) %>% `colnames<-`(c("delez_na", "moc_mehanizma"))
 
 start_time <- Sys.time()
-rez <- foreach(i = 1:nrow(zasnova), .combine = "rbind", 
+rez <- foreach(i = 1:nrow(zasnova), .combine = "rbind", .errorhandling = "pass",
                .packages = c("MASS", "mice", "missForest", 
                              "fpc", "DescTools", "DMwR", "norm")) %dorng% {
                                rngseed(45)
                                missNA.i <- zasnova[i, "delez_na"]
                                moc.i <- zasnova[i, "moc_mehanizma"]
-                               data.perfect <- generation.data(N = sampleSize)
-                               data.test <- generation.data(N = 1200)
+                               data.perfect <- generation.data.stara(N = sampleSize)
+                               data.test <- generation.data.stara(N = 1200)
                                data.NA.MAR <- get.NA.MAR(dataSet = data.perfect,
                                                          prop.NA = missNA.i,
                                                          moc.mehanizma = moc.i)
@@ -60,7 +60,8 @@ rez <- foreach(i = 1:nrow(zasnova), .combine = "rbind",
                               trentutniDF
                              }
 
-rez.d <- as.data.frame(apply(rez[,-3],2, as.numeric))
+rez.d <- as.data.frame(rez)
+rez.d <- as.data.frame(apply(rez.d[,-3],2, as.numeric))
 rez.d$mehanizem <- rez[,3]
 end_time <- Sys.time()   
 time<- end_time - start_time

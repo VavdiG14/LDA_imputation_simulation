@@ -23,6 +23,27 @@ generation.data <- function(N = 300){
   return(podatki)
 }
 
+generation.data.stara <- function(N = 300){
+  podatki <- NULL
+  n.skupin <- round(N/3, 0)
+  povprecje.skupin <- c(3, 5, 7)
+  r <- 0.3 #smisel življenja
+  Sigma <- rbind(c(1.0, r, r, r),
+                 c(r, 1.0, r, r),
+                 c(r, r, 1.0, r),
+                 c(r, r, r, 1.0)
+  )
+  for(i.mi in 1:3){
+    dataset <- as.data.frame(mvrnorm(n = n.skupin, mu = rep(povprecje.skupin[i.mi],4), Sigma = Sigma))
+    dataset$skupina <- rep(i.mi, n.skupin)
+    podatki <- rbind(podatki, dataset)
+  }
+  podatki <- as.data.frame(podatki)
+  colnames(podatki) <- c("X1", "X2", "X3", "X4", "skupina")
+  return(podatki)
+}
+
+
 get.NA.MAR <- function(dataSet, prop.NA = 0.1, moc.mehanizma = 4, plot=F){
   #INPUT:
   #dataSet - podatki, katerim želim nastaviti manjkajoče vrednosti

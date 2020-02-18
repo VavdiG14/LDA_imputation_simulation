@@ -5,7 +5,9 @@ library(ggplot2)
 
 ####PODATKI######
 
-rez.df <- readRDS("data/LDA_imputation_data2020-02-16.RDS")
+rez.df <- readRDS("data/praviNAdata.RDS")
+
+rez.df <- readRDS("data/LDA_imputation_data2020-02-18.RDS")
 #Manjka še združevanje podatkov s Nacetovimi
 
 
@@ -151,7 +153,7 @@ ggplot(primerjava.data.velika.moc, aes(x = metoda, y = mean.a, color = metoda)) 
         axis.text.x = element_text(colour = "white"))+
   ylab("Delež uspešnosti")+
   xlab("  ")+
-  labs(color = "Metoda")
+  labs(color = "Metoda")+
   ggtitle("Primerjava mehanizmov manjkajočih vrednosti", subtitle = "Moč mehanizma: m = 12")
 
 
