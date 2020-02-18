@@ -5,9 +5,9 @@ library(ggplot2)
 
 ####PODATKI######
 
-rez.df <- readRDS("data/praviNAdata.RDS")
+rez.df <- readRDS("data/navadnaPovprecja_NA_data2020-02-18.RDS")
 
-rez.df <- readRDS("data/LDA_imputation_data2020-02-18.RDS")
+#rez.df <- readRDS("data/LDA_imputation_data2020-02-18.RDS")
 #Manjka še združevanje podatkov s Nacetovimi
 
 
@@ -40,6 +40,7 @@ ggplot(summrise.df.MAR, aes(x = delez_na, y = prop.mean, color = variable, group
   ylab("Povprečni delež uspešnosti")+
   xlab("Delež NA vrednosti")+
   labs(color = "Metoda")+
+  ggtitle("Mehanizem MAR") +
   facet_grid(cols= vars(moc_mehanizma)) + 
   theme(legend.position = "bottom")
 
@@ -73,6 +74,7 @@ ggplot(summrise.df.NMAR,aes(x = delez_na, y = prop.mean, color = variable, group
   ylab("Povprečni delež uspešnosti")+
   xlab("Delež NA vrednosti")+
   labs(color = "Metoda")+
+  ggtitle("Mehanizem NMAR") +
   facet_grid(cols= vars(moc_mehanizma)) + 
   theme(legend.position = "bottom")
 
@@ -107,6 +109,7 @@ ggplot(summrise.df.MCAR,aes(x = delez_na, y = prop.mean, color = variable, group
   ylab("Povprečni delež uspešnosti")+
   xlab("Delež NA vrednosti")+
   labs(color = "Metoda")+
+  ggtitle("Mehanizem MCAR") +
   theme(legend.position = "bottom")
 
 

@@ -61,11 +61,17 @@ rez <- foreach(i = 1:nrow(zasnova), .combine = "rbind", .errorhandling = "pass",
                              }
 
 rez.d <- as.data.frame(rez)
-rez.d <- as.data.frame(apply(rez.d[,-3],2, as.numeric))
-rez.d$mehanizem <- rez[,3]
+
+data.df <- NULL
+c(10498, 23144, 25974)
+rez.d[10498,] <- NA
+rez.d[23144,] <- NA
+rez.d[25974,] <- NA
+rez.dokoncen <- as.data.frame(apply(rez.d[,-3],2, as.numeric))
+rez.dokoncen$mehanizem <- unlist(rez.d[,3])
 end_time <- Sys.time()   
 time<- end_time - start_time
 time
 stopCluster(cl)
 registerDoSEQ()
-saveRDS(object = as.data.frame(rez.d), paste("data/LDA_imputation_data", Sys.Date(),".RDS", sep = ""))
+saveRDS(object = as.data.frame(rez.dokoncen), paste("data/navadnaPovprecja_NA_data", Sys.Date(),".RDS", sep = ""))
